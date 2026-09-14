@@ -1,0 +1,54 @@
+import { test, expect } from '@playwright/test';
+
+test('course navigation, profile and long text exercise render without errors', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Tu camino de señales' })).toBeVisible();
+  await page.screenshot({ path: 'test-results/home-desktop.png' });
+  await page.getByRole('button', { name: 'Textos largos', exact: true }).click();
+  await page.locator('.lesson-row').first().click();
+  await expect(page.getByText('Segmento 1 /', { exact: false })).toBeVisible();
+  await page.getByRole('link', { name: 'Saltar al contenido' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Segmento 1 /', { exact: false })).toBeVisible();
+  await page.getByLabel('Forma de practicar').selectOption('continuous');
+  expect((await page.locator('.challenge > p').innerText()).split(/\s+/).length).toBeGreaterThanOrEqual(150);
+  await page.getByRole('button', { name: 'Perfil', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Bitácora del explorador.' })).toBeVisible();
+  await page.getByRole('button', { name: 'Competir', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Señales en compañía.' })).toBeVisible();
+  await page.screenshot({ path: 'test-results/compete-unconfigured.png' });
+  await page.getByRole('button', { name: 'Aprender', exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: 'test-results/home-mobile.png', fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test('practice pause, error bubble, success and profile remain usable on a small screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Comenzar a aprender' }).click();
+  await page.screenshot({ path: 'test-results/practice.png' });
+  await page.getByRole('button', { name: 'Pausar práctica' }).click();
+  await expect(page.getByText('Práctica en pausa', { exact: false })).toBeVisible();
+  await page.screenshot({ path: 'test-results/practice-paused.png' });
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await page.getByRole('button', { name: 'Morse a español', exact: true }).click();
+  await page.getByLabel('Tu traducción').fill('Z');
+  await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
+  await expect(page.getByRole('status').filter({ hasText: '¡Casi!' })).toBeVisible();
+  await page.screenshot({ path: 'test-results/error-bubble.png' });
+  await page.getByRole('button', { name: 'Repetir ejercicio' }).click();
+  await page.getByLabel('Tu traducción').fill('E');
+  await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
+  await expect(page.getByRole('heading', { name: '¡Señal recibida!' })).toBeVisible();
+  await page.screenshot({ path: 'test-results/success-feedback.png' });
+  await page.getByRole('button', { name: 'Perfil', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Bitácora del explorador.' })).toBeVisible();
+  await expect(page.getByText('Los intentos locales no se convierten automáticamente en XP verificada.')).toBeVisible();
+  await page.screenshot({ path: 'test-results/profile.png' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

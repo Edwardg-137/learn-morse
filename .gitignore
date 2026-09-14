@@ -1,0 +1,10 @@
+# internal docs
+docs/general_instructions.md
+docs/implementations/
+node_modules/
+dist/
+.env.local
+.env.*.local
+test-results/
+playwright-report/
+*.tsbuildinfo

@@ -1,0 +1,10 @@
+{
+  "id": "/", "name": "Learn Morse — Cada señal cuenta", "short_name": "Learn Morse",
+  "lang": "es", "start_url": "/", "scope": "/", "display": "standalone",
+  "background_color": "#fbfcf7", "theme_color": "#f7f8ef",
+  "description": "Aprende código morse, practica con Espacio y comparte duelos.",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
