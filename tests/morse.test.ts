@@ -52,6 +52,10 @@ test('catalog has distinct variants, complete symbols, and valid original exerci
     stages.add(lesson.stage);
     assert.ok(lesson.title && lesson.description && lesson.explanation, lesson.id);
     assert.ok(lesson.examples.length > 0, lesson.id);
+    if (lesson.infinite) {
+      assert.equal(lesson.exercises.length, 0, lesson.id);
+      continue;
+    }
     assert.ok(lesson.exercises.length >= 2, lesson.id);
     assert.equal(new Set(lesson.exercises).size, lesson.exercises.length, lesson.id);
     for (const text of [...lesson.examples, ...lesson.exercises]) {

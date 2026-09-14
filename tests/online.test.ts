@@ -109,7 +109,7 @@ test('server enforces XP, membership, immutable ordered duels and deadlines', as
     assert.equal((await db.query<{ value: string }>('select morse_decode($1) as value', [morse])).rows[0]!.value, symbol)
   }
   const catalog = (await db.query<{lesson_id:string;exercise_index:number;target:string}>(`select * from lesson_catalog where lesson_id<>'test'`)).rows
-  assert.equal(catalog.length, lessons.reduce((sum, lesson) => sum + lesson.exercises.length, 0))
+  assert.equal(catalog.length, lessons.reduce((sum, lesson) => sum + (lesson.infinite ? 0 : lesson.exercises.length), 0))
   for (const row of catalog) assert.equal(row.target, normalize(lessons.find(lesson => lesson.id === row.lesson_id)!.exercises[row.exercise_index]!))
   await db.close()
 })

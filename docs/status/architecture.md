@@ -4,7 +4,7 @@ Actualizado: 2026-09-14.
 
 ## Interfaz
 
-React 19 y TypeScript se compilian con Vite 7 a archivos estáticos. `src/App.tsx` mantiene la página activa por hash (`#aprender`, `#practicar`, `#competir`, `#perfil`) y el ejercicio abierto en memoria. En Aprender, el botón del hero abre `MorseGuide` como un `dialog` que se expande desde ese botón. `stepOutcome` en `src/lib/guide.ts` valida un solo paso; no se avanza hasta completarlo y elegir «Siguiente». Cerrado, no hay tecla montada. `Practice` orquesta dirección, segmentos, pistas, historial y resultados. `MorseKey` es el único control que produce puntos y rayas.
+React 19 y TypeScript se compilian con Vite 7 a archivos estáticos. `src/App.tsx` mantiene la página activa por hash (`#aprender`, `#practicar`, `#competir`, `#perfil`) y el ejercicio abierto en memoria. En Aprender, el botón del hero abre `MorseGuide` como un `dialog` que se expande desde ese botón. `stepOutcome` en `src/lib/guide.ts` valida un solo paso; no se avanza hasta completarlo y elegir «Siguiente». Cerrado, no hay tecla montada. `Practice` orquesta dirección, segmentos, pistas, historial y resultados. Si la lección tiene `infinite`, genera el siguiente símbolo en `src/lib/infinite.ts` y lo guarda en el borrador; no llama a `submitPractice`. `MorseKey` es el único control que produce puntos y rayas.
 
 El CSS propio define la identidad de radio y señales, el diseño de dos columnas en escritorio y el apilado en móvil. `prefers-reduced-motion: reduce` elimina animaciones y transiciones.
 
@@ -24,7 +24,7 @@ Mientras el control de transmisión está en pantalla y no está desactivado, `k
 
 ## Persistencia local
 
-`localStorage` guarda `learn-morse-progress` (intentos con id único), `learn-morse-draft` (sesión interrumpida) y `learn-morse-settings`. Datos corruptos se sustituyen por un estado vacío con aviso. `saveAttempt` ignora el mismo `id`. El 85 % en todas las variantes y ambas direcciones marca la lección como superada en este navegador.
+`localStorage` guarda `learn-morse-progress` (intentos con id único), `learn-morse-draft` (sesión interrumpida) y `learn-morse-settings`. Datos corruptos se sustituyen por un estado vacío con aviso. `saveAttempt` ignora el mismo `id`. El 85 % en todas las variantes y ambas direcciones marca una lección finita como superada en este navegador. Las lecciones `infinite` no entran en ese recuento.
 
 ## Navegador frente a servidor
 
@@ -32,7 +32,7 @@ El navegador clasifica pulsaciones, dibuja y reproduce audio. No concede XP ni d
 
 ## Supabase Auth, PostgreSQL, RLS y Realtime
 
-Código cliente: `src/online/client.ts` y `src/online/Panels.tsx`. Migración: `supabase/migrations/202609130001_morse.sql`. El seed se genera desde el catálogo TypeScript.
+Código cliente: `src/online/client.ts` y `src/online/Panels.tsx`. Migración: `supabase/migrations/202609130001_morse.sql`. El seed se genera desde el catálogo TypeScript; las lecciones infinitas no insertan filas.
 
 Tablas con RLS. El cliente autenticado solo lee su perfil, intentos y XP, y las salas, miembros y segmentos de salas a las que pertenece. No hay política de lectura sobre `lesson_catalog` ni `room_challenges`. No hay INSERT/UPDATE/DELETE de cliente sobre esas tablas. Las escrituras de XP, práctica y duelos son funciones `security definer` que exigen `auth.uid()`. `award_xp` y `close_duel` no se conceden a `anon` ni `authenticated`. `p_forfeit = NULL` se rechaza.
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { type Lesson } from '../content/lessons';
 import { decode, encode, evaluate, normalize } from '../lib/morse';
+import { randomSignal } from '../lib/infinite';
 import { playText, stopAudio } from '../lib/audio';
 import type { Attempt } from '../lib/progress';
 import { submitPractice } from '../online/client';
@@ -9,7 +10,7 @@ import { MorseKey, defaultSettings, readSettings, type KeySettings } from './Mor
 type Direction = 'send' | 'receive';
 type Result = ReturnType<typeof evaluate>;
 type SegmentReview = { id: string; segment: number; answer: string; result: Result; date: string };
-type Draft = { lessonId: string; exercise: number; direction: Direction; segment: number; answers: string[]; answer: string; seconds: number; segmented: boolean; attemptId: string; reviews: SegmentReview[]; result: Result | null; finalResult: Result | null };
+type Draft = { lessonId: string; exercise: number; direction: Direction; segment: number; answers: string[]; answer: string; seconds: number; segmented: boolean; attemptId: string; reviews: SegmentReview[]; result: Result | null; finalResult: Result | null; targets?: string[] };
 
 const splitSegments = (text: string, segmented: boolean) => segmented && text.split(/\s+/).length > 25 ? (text.match(/[^.!?]+[.!?]?/g) || [text]).map(s => s.trim()).filter(Boolean) : [text];
 function validResult(value: unknown): value is Result {
@@ -21,10 +22,16 @@ function validResult(value: unknown): value is Result {
 function readDraft(lesson: Lesson): Draft | null {
   try {
     const d = JSON.parse(localStorage.getItem('learn-morse-draft') || 'null');
-    if (!(d?.lessonId === lesson.id && Number.isInteger(d.exercise) && d.exercise >= 0 && d.exercise < lesson.exercises.length && Number.isInteger(d.segment) && d.segment >= 0 &&
+    if (!(d?.lessonId === lesson.id && Number.isInteger(d.exercise) && d.exercise >= 0 && Number.isInteger(d.segment) && d.segment >= 0 &&
       ['send', 'receive'].includes(d.direction) && Array.isArray(d.answers) && d.answers.every((s: unknown) => typeof s === 'string') &&
       typeof d.answer === 'string' && Number.isFinite(d.seconds) && d.seconds >= 0 && typeof d.segmented === 'boolean')) return null;
-    const count = splitSegments(lesson.exercises[d.exercise], d.segmented).length;
+    const targets = Array.isArray(d.targets) && d.targets.every((s: unknown) => typeof s === 'string' && (s as string).length > 0) ? d.targets as string[] : undefined;
+    if (lesson.infinite) {
+      if (!targets || d.exercise >= targets.length) return null;
+      for (const item of targets) decode(encode(item));
+    } else if (d.exercise >= lesson.exercises.length) return null;
+    const source = lesson.infinite ? targets![d.exercise] : lesson.exercises[d.exercise];
+    const count = splitSegments(source, d.segmented).length;
     if (d.segment >= count || d.answers.length !== d.segment) return null;
     if (d.direction === 'send') decode(d.answer);
     for (const answer of d.answers) evaluate('', answer);
@@ -33,13 +40,14 @@ function readDraft(lesson: Lesson): Draft | null {
       Number.isInteger(r.segment) && r.segment >= 0 && r.segment < count && typeof r.answer === 'string' && typeof r.date === 'string' && validResult(r.result))) return null;
     if (d.result != null && !validResult(d.result)) return null;
     if (d.finalResult != null && (!validResult(d.finalResult) || !d.result || d.segment !== count - 1)) return null;
-    return { ...d, attemptId: typeof d.attemptId === 'string' && d.attemptId ? d.attemptId : crypto.randomUUID(), reviews, result: d.result ?? null, finalResult: d.finalResult ?? null };
+    return { ...d, targets, attemptId: typeof d.attemptId === 'string' && d.attemptId ? d.attemptId : crypto.randomUUID(), reviews, result: d.result ?? null, finalResult: d.finalResult ?? null };
   } catch { return null; }
 }
 
 export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack: () => void; onRecord: (attempt: Attempt) => void }) {
   const [draft] = useState(() => readDraft(lesson));
-  const [exercise, setExercise] = useState(() => Math.min(draft?.exercise || 0, lesson.exercises.length - 1));
+  const [targets, setTargets] = useState<string[]>(() => lesson.infinite ? (draft?.targets?.length ? draft.targets : [randomSignal()]) : []);
+  const [exercise, setExercise] = useState(() => lesson.infinite ? draft?.exercise || 0 : Math.min(draft?.exercise || 0, lesson.exercises.length - 1));
   const [direction, setDirection] = useState<Direction>(draft?.direction || 'send');
   const [segmented, setSegmented] = useState(draft?.segmented ?? true);
   const [segment, setSegment] = useState(draft?.segment || 0);
@@ -67,7 +75,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
   const previousCode = useRef(draft?.answer || '');
   const activeAttempt = useRef(attemptId); activeAttempt.current = attemptId;
   const submitting = useRef(false);
-  const text = lesson.exercises[exercise];
+  const text = (lesson.infinite ? targets[exercise] : lesson.exercises[exercise]) || '';
   const segments = splitSegments(text, segmented);
   const index = Math.min(segment, segments.length - 1);
   const target = segments[index];
@@ -87,9 +95,9 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
     return () => { window.removeEventListener('blur', lost); document.removeEventListener('visibilitychange', hidden); audioRequest.current++; stopAudio(); clearTimeout(playTimer.current); };
   }, []);
   useEffect(() => {
-    try { localStorage.setItem('learn-morse-draft', JSON.stringify({ lessonId: lesson.id, exercise, direction, segment: index, answers, answer, seconds, segmented, attemptId, reviews, result, finalResult })); }
+    try { localStorage.setItem('learn-morse-draft', JSON.stringify({ lessonId: lesson.id, exercise, direction, segment: index, answers, answer, seconds, segmented, attemptId, reviews, result, finalResult, targets: lesson.infinite ? targets : undefined })); }
     catch { setWarning('No se pudo guardar esta sesión. Mantén esta página abierta para conservarla.'); }
-  }, [exercise, direction, index, answers, answer, Math.floor(seconds), segmented, attemptId, reviews, result, finalResult]);
+  }, [exercise, direction, index, answers, answer, Math.floor(seconds), segmented, attemptId, reviews, result, finalResult, targets]);
   useEffect(() => {
     if (!bubble) return;
     const timer = setTimeout(() => setBubble(''), 1300);
@@ -98,7 +106,15 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
   function silence() { audioRequest.current++; stopAudio(); clearTimeout(playTimer.current); setPlaying(false); }
   function clearInput() { setAnswer(''); setPending(false); setResult(null); previousCode.current = ''; setResetKey(k => k + 1); setBubble(''); silence(); }
   function startOver(nextExercise = exercise, nextDirection = direction) {
-    submitting.current = false; clearInput(); setExercise(nextExercise); setDirection(nextDirection); setSegment(0); setAnswers([]); setSeconds(0); setFinalResult(null); setPaused(false); setOnlineStatus(''); setReviews([]); setAttemptId(crypto.randomUUID());
+    submitting.current = false; clearInput();
+    if (lesson.infinite) {
+      setTargets(current => {
+        const next = current.length ? [...current] : [randomSignal()];
+        while (next.length <= nextExercise) next.push(randomSignal(Math.random, next[next.length - 1]));
+        return next;
+      });
+    }
+    setExercise(nextExercise); setDirection(nextDirection); setSegment(0); setAnswers([]); setSeconds(0); setFinalResult(null); setPaused(false); setOnlineStatus(''); setReviews([]); setAttemptId(crypto.randomUUID());
   }
   function capture(code: string) {
     setAnswer(code);
@@ -129,7 +145,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
         onRecord({ id, lessonId: lesson.id, exercise, direction, accuracy: overall.accuracy, seconds, date: new Date().toISOString() });
         const submitted = direction === 'send' ? [...answers.map(a => a.includes('�') ? '' : encode(a)), answer].join(' / ') : collected.join(' ');
         setOnlineStatus('Guardado en este navegador.');
-        if (direction === 'receive' || !collected.some(a => a.includes('�'))) {
+        if (!lesson.infinite && (direction === 'receive' || !collected.some(a => a.includes('�')))) {
           const award = await submitPractice(lesson.id, exercise, direction, submitted, id);
           if (award && activeAttempt.current === id) setOnlineStatus(`Resultado verificado · +${award.awarded} XP · ${award.xp} XP totales`);
         }
@@ -146,7 +162,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
   const shownResult = finalResult || result;
   return <div className="practice-page">
     <button className="text-button back-button" onClick={onBack}>← Volver al recorrido</button>
-    <div className="practice-heading"><div><span className="eyebrow">{lesson.stage} · EJERCICIO {exercise + 1} DE {lesson.exercises.length}</span><h1>{lesson.title}</h1><p>{lesson.description}</p></div><span className="timer">◷ {Math.floor(seconds / 60)}:{String(Math.floor(seconds % 60)).padStart(2, '0')}</span></div>
+    <div className="practice-heading"><div><span className="eyebrow">{lesson.infinite ? `${lesson.stage} · SEÑAL ${exercise + 1} · SIN FIN` : `${lesson.stage} · EJERCICIO ${exercise + 1} DE ${lesson.exercises.length}`}</span><h1>{lesson.title}</h1><p>{lesson.description}</p></div><span className="timer">◷ {Math.floor(seconds / 60)}:{String(Math.floor(seconds % 60)).padStart(2, '0')}</span></div>
     <div className="practice-columns"><section className="practice-card card">
       <div className="segmented-control"><button aria-pressed={direction === 'send'} onClick={() => startOver(exercise, 'send')}>Español a morse</button><button aria-pressed={direction === 'receive'} onClick={() => startOver(exercise, 'receive')}>Morse a español</button></div>
       <div className="exercise-toolbar"><span>Segmento {index + 1} / {segments.length}</span><button className="text-button" onClick={() => { setPaused(p => !p); silence(); }}>{paused ? 'Reanudar práctica' : 'Pausar práctica'}</button></div>
@@ -162,7 +178,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
       {!result && <div className="exercise-actions"><button className="text-button" onClick={() => { if (!help && presentation === 'audio') { setPresentation('both'); setWarning('Ayuda activada: cambiamos a Visual y audio para mostrar la pista.'); } setHelp(h => !h); }}>{help ? 'Ocultar ayuda' : 'Ver una pista'}</button><button className="button primary" disabled={paused || pending || !answer.trim()} onClick={() => void check()}>Comprobar respuesta <span>→</span></button></div>}
       {help && <div className="hint"><strong>Una señal a la vez</strong><p>{normalized}</p><code>{encode(target)}</code><small>La ñ usa --.-- en este curso. Tildes y mayúsculas no cambian la respuesta.</small></div>}
       {shownResult && <div className={`result-card ${shownResult.accuracy >= 85 ? 'success' : ''}`}><span className="eyebrow">{completed ? 'EJERCICIO COMPLETO' : 'SEGMENTO REVISADO'}</span><h2>{shownResult.accuracy >= 85 ? '¡Señal recibida!' : 'Cada intento te acerca'}</h2><div className="result-stats"><strong>{Math.round(shownResult.accuracy)}% <small>precisión</small></strong><strong>{shownResult.substitutions + shownResult.insertions + shownResult.deletions} <small>errores</small></strong></div><p>{shownResult.substitutions} sustituciones · {shownResult.deletions} omisiones · {shownResult.insertions} inserciones</p><p className="review-answer"><b>Respuesta esperada:</b> {normalize(completed ? text : target)}</p>{onlineStatus && <p role="status">{onlineStatus}</p>}
-        <div className="result-actions">{completed ? <><button className="button secondary" onClick={() => startOver()}>Repetir ejercicio</button><button className="button primary" onClick={() => startOver((exercise + 1) % lesson.exercises.length)}>Siguiente ejercicio →</button></> : <><button className="button secondary" onClick={retrySegment}>Repetir segmento</button><button className="button primary" onClick={nextSegment}>Siguiente segmento →</button></>}</div>
+        <div className="result-actions">{completed ? <><button className="button secondary" onClick={() => startOver()}>Repetir ejercicio</button><button className="button primary" onClick={() => startOver(lesson.infinite ? exercise + 1 : (exercise + 1) % lesson.exercises.length)}>{lesson.infinite ? 'Siguiente señal →' : 'Siguiente ejercicio →'}</button></> : <><button className="button secondary" onClick={retrySegment}>Repetir segmento</button><button className="button primary" onClick={nextSegment}>Siguiente segmento →</button></>}</div>
       </div>}
       {reviews.length > 0 && <details className="hint" open data-testid="segment-history"><summary>Historial de segmentos · {reviews.length} intentos</summary><p>Los errores anteriores se conservan aunque repitas. Total registrado: {reviews.reduce((sum, review) => sum + review.result.distance, 0)} errores.</p><ol>{reviews.map((review, i) => <li key={review.id}><b>Intento {i + 1} · Segmento {review.segment + 1} · {Math.round(review.result.accuracy)}%</b><p>Tu respuesta: {review.answer || 'Sin respuesta'}</p><small>{review.result.substitutions} sustituciones · {review.result.deletions} omisiones · {review.result.insertions} inserciones</small></li>)}</ol></details>}
       {warning && <p className="notice" role="status">{warning}</p>}

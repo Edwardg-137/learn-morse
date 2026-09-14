@@ -7,6 +7,7 @@ export interface Lesson {
   explanation: string;
   examples: string[];
   exercises: string[];
+  infinite?: boolean;
 }
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÑ';
@@ -73,6 +74,13 @@ export const lessons: Lesson[] = [
     description: 'Del 0 al 9 con patrones de cinco señales.',
     explanation: 'Los números siempre tienen cinco señales. Del 1 al 5 aumentan los puntos iniciales y disminuyen las rayas. Del 6 al 0 aumentan las rayas iniciales. El cero son cinco rayas. Separa las cifras como letras, no como palabras independientes.',
     examples: ['12345', '67890'], exercises: ['01234', '56789', '2026', '73', 'RADIO 5'],
+  },
+  {
+    id: 'senales-sueltas', title: 'Señales sueltas', stage: 'Ampliación', symbols: `${alphabet}0123456789`,
+    infinite: true,
+    description: 'Letras y números individuales al azar, sin fin. Dificultad intermedia.',
+    explanation: 'Esta práctica no se agota. Cada ronda muestra una sola letra o un solo número, elegido al azar entre A–Z, Ñ y 0–9. Ya conoces el alfabeto y las cifras de cinco señales: aquí las mezclas una a una, en ambas direcciones, al ritmo que elijas. Completar una señal no cierra la lección; puedes seguir o volver al recorrido cuando quieras. Esta práctica local no concede XP de servidor.',
+    examples: ['K', '7', 'Ñ'], exercises: [],
   },
   {
     id: 'puntuacion', title: 'Mensajes con intención', stage: 'Ampliación', symbols: repertoire,

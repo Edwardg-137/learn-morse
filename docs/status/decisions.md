@@ -87,3 +87,19 @@
 - Decisión: crear `.github/agents/learn-morse-ui-ux.agent.md` con herramientas de lectura, búsqueda, edición y ejecución, y con límites explícitos sobre `MorseKey`, accesibilidad, dependencias y validación.
 - Justificación: concentra el conocimiento visual y las invariantes del producto sin añadir código de ejecución ni dependencias al bundle.
 - Consecuencias: las futuras tareas de interfaz pueden delegarse a un agente consistente; sus cambios seguirán requiriendo pruebas y sincronización documental.
+
+## 2026-09-14 — Taladro infinito de señales sueltas
+
+- Contexto: tras letras y números no había una práctica intermedia que no se agotara.
+- Problema: una lista finita se memoriza; un taladro suelto necesita letras y cifras mezcladas, una a una.
+- Decisión: lección `senales-sueltas` en Ampliación, `infinite: true`, ejercicios vacíos. `randomSignal` elige A–Z, Ñ o 0–9 y evita repetir el símbolo anterior. El porcentaje del curso solo cuenta las 16 lecciones finitas. No hay filas en `lesson_catalog` ni XP de servidor.
+- Justificación: el motor y los umbrales no cambian; solo cambia cómo se elige el objetivo.
+- Consecuencias: «Siguiente señal» alarga la cola guardada en el borrador. Completar el resto del curso sigue pudiendo llegar al 100 %.
+
+## 2026-09-14 — Licencia MIT-0 con atribución opcional
+
+- Contexto: el repositorio no tenía licencia y se pidió libertad total de uso.
+- Problema: MIT clásico exige conservar el aviso de copyright; Unlicense no pide créditos.
+- Decisión: MIT-0 en `LICENSE` y `package.json`. Se solicita, sin obligar, mención a https://github.com/Edwardg-137.
+- Justificación: cualquier uso, copia o reventa queda permitido; el crédito es cortesía.
+- Consecuencias: GitHub detecta el archivo `LICENSE`. No hay obligación legal de atribuir.

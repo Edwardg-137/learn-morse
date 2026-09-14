@@ -9,8 +9,8 @@ Actualizado: 2026-09-14. Solo se enumeran carpetas y archivos existentes relevan
 | `docs/status/` | Estado funcional, estructura, arquitectura y decisiones reales. |
 | `docs/changelog.md` | Historial resumido. |
 | `src/` | Aplicación React: interfaz, motor, contenido, audio, progreso y cliente en línea. |
-| `src/lib/` | Motor de morse, audio Web Audio, persistencia local, reglas de la guía y captura de tecla, sin React. |
-| `src/content/lessons.ts` | Catálogo versionado de lecciones y ejercicios. |
+| `src/lib/` | Motor de morse, audio Web Audio, persistencia local, reglas de la guía, captura de tecla y generador de señales infinitas, sin React. |
+| `src/content/lessons.ts` | Catálogo versionado de lecciones, ejercicios y el taladro infinito. |
 | `src/components/` | `Practice.tsx` (sesión de práctica), `MorseKey.tsx` (captura Espacio/táctil) y `MorseGuide.tsx` (recorrido de la tecla desde el hero). |
 | `src/online/` | Paneles de cuenta y duelo, cliente de Supabase y estilos asociados. |
 | `src/App.tsx` | Navegación entre Aprender, Practicar, Competir y Perfil. |
@@ -23,7 +23,8 @@ Actualizado: 2026-09-14. Solo se enumeran carpetas y archivos existentes relevan
 | `supabase/` | Migración, seed, `config.toml`, generador del catálogo SQL y README del backend. |
 | `.github/agents/` | Agentes especializados compartidos del workspace; contiene el agente de UI/UX, animaciones y librerías estéticas. |
 | `index.html`, `package.json`, `vite.config.ts`, `playwright*.ts`, `tsconfig.json` | Arranque, compilación y pruebas. |
+| `LICENSE` | MIT-0: uso libre; atribución a github.com/Edwardg-137 pedida, no exigida. |
 | `.env.example` | Nombres públicos `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`, vacíos. |
 | `README.md` | Cómo ejecutar, comprobar y preparar la publicación. |
 
-No hay `LICENSE`. `node_modules/`, `dist/`, `.env.local`, informes de Playwright y esta carpeta de implementations no forman parte de la arquitectura publicada.
+`node_modules/`, `dist/`, `.env.local`, informes de Playwright y esta carpeta de implementations no forman parte de la arquitectura publicada.

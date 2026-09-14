@@ -1,5 +1,12 @@
 # Registro de cambios
 
+## 2026-09-14 — Taladro infinito y licencia MIT-0
+
+- Se añadió la lección intermedia «Señales sueltas»: letras y números individuales al azar, sin fin. No cuenta para el porcentaje del curso ni concede XP de servidor.
+- Se publicó `LICENSE` (MIT-0): uso libre; se pide, sin exigir, mención a https://github.com/Edwardg-137.
+- Pruebas: `tests/infinite.test.ts` y `e2e/practice.spec.ts`. Documentos: `status/general.md`, `status/structure.md`, `status/architecture.md`, `status/decisions.md`, `implementations/2026-09-nivel-infinito-y-licencia.md`.
+- Impacto: hay un taladro que no se agota tras números. El catálogo SQL sigue con 81 ejercicios.
+
 ## 2026-09-14 — Captura Morse sin clic previo
 
 - La tecla asignada transmite en cuanto el control está en pantalla, sin tener que hacer clic en el botón. Los campos de texto no se interceptan.

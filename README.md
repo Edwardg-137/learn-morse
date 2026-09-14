@@ -24,7 +24,7 @@ npm run dev
 
 Si el bloqueo persiste, cierra el antivirus o cualquier editor con la carpeta abierta y repite la instalación. Tras limpiar el estado, la app compila y arranca correctamente con Vite en Node 24.
 
-La app incluye 16 lecciones y 81 ejercicios originales, en ambas direcciones. En Aprender, el botón «Cómo funciona la tecla» abre un recorrido de cinco pasos con el mismo control: un concepto cada vez, con opción de repetir o seguir. Ofrece calibración, pistas, presentación visual/auditiva, feedback animado con movimiento reducido y progreso guardado en el navegador. Los textos largos de 182 y 495 palabras se practican completos o por oración.
+La app incluye 16 lecciones con 81 ejercicios originales, más un taladro infinito de letras y números sueltos, en ambas direcciones. En Aprender, el botón «Cómo funciona la tecla» abre un recorrido de cinco pasos con el mismo control: un concepto cada vez, con opción de repetir o seguir. Ofrece calibración, pistas, presentación visual/auditiva, feedback animado con movimiento reducido y progreso guardado en el navegador. Los textos largos de 182 y 495 palabras se practican completos o por oración.
 
 Para transmitir, pulsa la tecla asignada (Espacio por defecto) en cuanto ves el control; no hace falta hacer clic primero. La captura no intercepta los campos de texto. Los umbrales iniciales son 250 ms para raya, 700 ms para confirmar letra y 1600 ms para palabra; se ajustan dentro de la práctica. El sonido requiere una interacción y puede depender de la política del navegador.
 
@@ -51,16 +51,8 @@ npm run test:pwa
 
 No se afirma validación de Google OAuth o transporte Realtime contra una instancia remota. Antes de publicar debe completarse un duelo con dos cuentas reales, además de comprobar audio/tacto en dispositivos físicos.
 
-## Publicar la web
-
-En Cloudflare Pages: comando de compilación `npm run build`, directorio de salida `dist`, Node.js 24 y HTTPS. Servir `/manifest.webmanifest`, `/icon-192.png`, `/icon-512.png` y `/sw.js`. Variables públicas `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` solo si se activa el backend. Registrar el dominio final entre las redirecciones OAuth. Las competencias deben avisar que necesitan red. No incluir secretos ni `service_role` con prefijo `VITE_`. No conectar una cuenta externa sin autorización expresa.
-
-La interfaz es estática; no requiere un servidor Node en producción. La compilación genera el service worker y su lista de archivos públicos cacheables. No cachea llamadas de Supabase ni respuestas privadas. Las actualizaciones se ofrecen al usuario; conviene terminar o guardar la práctica antes de actualizar. Borrar datos del navegador elimina progreso local y caché.
-
-Los planes gratuitos tienen cuotas, pueden cambiar y no garantizan disponibilidad. Supabase Free puede pausarse por inactividad; revisar consumo, respaldos y recuperación antes de una publicación pública. [Precios oficiales](https://supabase.com/pricing).
-
 ## Contribuir y documentación
 
 Consulta [el estado real](docs/status/general.md), [la arquitectura](docs/status/architecture.md) y [el historial](docs/changelog.md). El catálogo está en `src/content/lessons.ts`; después de cambiarlo ejecuta `node supabase/generate-seed.ts` y `npm test`. Un catálogo ya publicado necesita una migración/versionado explícito, como explica el backend.
 
-La ñ usa `--.--` como extensión del curso. Se ignoran mayúsculas, tildes vocálicas y el signo de apertura ¿; se preserva ñ y se rechazan caracteres no soportados. El proyecto está pensado para distribuirse como código libre; el titular todavía debe elegir la licencia del código y los contenidos antes de la publicación. No existe archivo `LICENSE`. Los textos del curso y los iconos se escribieron para esta app. No se han utilizado imágenes ni textos de Mario Party: únicamente es una referencia del tono del feedback.
+La ñ usa `--.--` como extensión del curso. Se ignoran mayúsculas, tildes vocálicas y el signo de apertura ¿; se preserva ñ y se rechazan caracteres no soportados. El código se publica con [MIT-0](LICENSE): puedes usarlo para cualquier fin. Se agradece, sin exigir, una mención a [github.com/Edwardg-137](https://github.com/Edwardg-137).

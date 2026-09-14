@@ -38,6 +38,17 @@ test('Espacio transmits a dot, holding transmits one dash, and Spanish typing re
   await expect(page.getByLabel('Tu traducción')).toHaveValue('HOLA MUNDO');
 });
 
+test('infinite drill shows one random letter or number and does not end', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('button', { name: /Señales sueltas/ }).click();
+  await expect(page.getByRole('heading', { name: 'Señales sueltas' })).toBeVisible();
+  await expect(page.getByText('Ampliación · SEÑAL 1 · SIN FIN')).toBeVisible();
+  await expect(page.locator('.challenge > p')).toHaveText(/^[A-ZÑ0-9]$/);
+  await expect(page.getByRole('button', { name: 'Transmitir morse con Espacio' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test('mobile layout and lesson feedback remain usable with reduced motion', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
