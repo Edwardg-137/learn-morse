@@ -4,7 +4,7 @@ Actualizado: 2026-09-14.
 
 ## Interfaz
 
-React 19 y TypeScript se compilian con Vite 7 a archivos estáticos. `src/App.tsx` mantiene la página activa por hash (`#aprender`, `#practicar`, `#competir`, `#perfil`) y el ejercicio abierto en memoria. `Practice` orquesta dirección, segmentos, pistas, historial y resultados. `MorseKey` es el único control que produce puntos y rayas.
+React 19 y TypeScript se compilian con Vite 7 a archivos estáticos. `src/App.tsx` mantiene la página activa por hash (`#aprender`, `#practicar`, `#competir`, `#perfil`) y el ejercicio abierto en memoria. En Aprender, el botón del hero abre `MorseGuide` como un `dialog` que se expande desde ese botón. `stepOutcome` en `src/lib/guide.ts` valida un solo paso; no se avanza hasta completarlo y elegir «Siguiente». Cerrado, no hay tecla montada. `Practice` orquesta dirección, segmentos, pistas, historial y resultados. `MorseKey` es el único control que produce puntos y rayas.
 
 El CSS propio define la identidad de radio y señales, el diseño de dos columnas en escritorio y el apilado en móvil. `prefers-reduced-motion: reduce` elimina animaciones y transiciones.
 

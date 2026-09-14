@@ -14,9 +14,9 @@ export function readSettings(): KeySettings {
   } catch { return defaultSettings; }
 }
 
-export function MorseKey({ onChange, onPendingChange, initialCode = '', disabled = false, resetKey = 0, settings = defaultSettings }: {
-  onChange: (code: string) => void; onPendingChange?: (pending: boolean) => void; initialCode?: string;
-  disabled?: boolean; resetKey?: string | number; settings?: KeySettings;
+export function MorseKey({ onChange, onPendingChange, onPendingCode, initialCode = '', disabled = false, resetKey = 0, settings = defaultSettings }: {
+  onChange: (code: string) => void; onPendingChange?: (pending: boolean) => void; onPendingCode?: (pending: string) => void;
+  initialCode?: string; disabled?: boolean; resetKey?: string | number; settings?: KeySettings;
 }) {
   const [pressed, setPressed] = useState(false);
   const [pending, setPending] = useState('');
@@ -26,13 +26,14 @@ export function MorseKey({ onChange, onPendingChange, initialCode = '', disabled
   const current = useRef({ start: null as number | null, pending: '', code: initialCode, word: false, pointer: null as number | null, press: 0 });
   const callbacks = useRef(onChange); callbacks.current = onChange;
   const pendingCallback = useRef(onPendingChange); pendingCallback.current = onPendingChange;
+  const pendingCodeCallback = useRef(onPendingCode); pendingCodeCallback.current = onPendingCode;
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const stop = useRef<() => void>(() => {});
   const keyName = settings.key === ' ' ? 'Espacio' : settings.key.toUpperCase();
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
   const cancel = () => {
     clearTimers(); stop.current(); current.current.press++; current.current.start = null; current.current.pending = ''; current.current.pointer = null;
-    setPending(''); setPressed(false); pendingCallback.current?.(false);
+    setPending(''); setPressed(false); pendingCallback.current?.(false); pendingCodeCallback.current?.('');
   };
   const reset = () => { cancel(); current.current.code = ''; current.current.word = false; setCode(''); callbacks.current(''); };
   useEffect(() => { cancel(); current.current.code = initialCode; current.current.word = false; setCode(initialCode); callbacks.current(initialCode); }, [resetKey]);
@@ -54,12 +55,12 @@ export function MorseKey({ onChange, onPendingChange, initialCode = '', disabled
     if (state.start === null) return;
     const symbol = performance.now() - state.start >= settings.dashMs ? '-' : '.';
     state.start = null; state.press++; stop.current(); setPressed(false);
-    state.pending += symbol; setPending(state.pending); setStatus('Pausa corta: otra señal · Pausa larga: nueva letra');
+    state.pending += symbol; setPending(state.pending); pendingCodeCallback.current?.(state.pending); setStatus('Pausa corta: otra señal · Pausa larga: nueva letra');
     timers.current.push(setTimeout(() => {
       if (!state.pending) return;
       state.code += (state.code ? (state.word ? ' / ' : ' ') : '') + state.pending;
       state.pending = ''; state.word = false;
-      setPending(''); setCode(state.code); callbacks.current(state.code); pendingCallback.current?.(false); setStatus('Letra confirmada');
+      setPending(''); pendingCodeCallback.current?.(''); setCode(state.code); callbacks.current(state.code); pendingCallback.current?.(false); setStatus('Letra confirmada');
     }, settings.letterMs));
     timers.current.push(setTimeout(() => { state.word = true; setStatus('Pausa de palabra · Continúa cuando quieras'); }, settings.wordMs));
   }

@@ -6,7 +6,7 @@ Learn Morse es una aplicación web para aprender código morse en español. Comb
 
 ## Qué funciona en local, sin claves
 
-La interfaz React se ejecuta con Vite. Hay dieciséis lecciones y ochenta y un ejercicios originales, en siete etapas, hasta dos textos de 182 y 495 palabras. Espacio es la tecla predeterminada: pulsación corta para punto, sostenida para raya. En móvil el mismo control es táctil. El navegador genera el audio con Web Audio API. El progreso, los borradores y los ajustes se guardan en este navegador. La PWA cachea solo recursos públicos de la propia origen.
+La interfaz React se ejecuta con Vite. Hay dieciséis lecciones y ochenta y un ejercicios originales, en siete etapas, hasta dos textos de 182 y 495 palabras. En Aprender, el botón «Cómo funciona la tecla» abre un recorrido de cinco pasos (punto, raya, misma letra, otra letra, espacio entre palabras). Cada paso se prueba con la tecla real; no se puede saltar. Tras completarlo se elige repetir o seguir. Al cerrar, deja de capturar Espacio. Espacio es la tecla predeterminada: pulsación corta para punto, sostenida para raya. En móvil el mismo control es táctil. El navegador genera el audio con Web Audio API. El progreso, los borradores y los ajustes se guardan en este navegador. La PWA cachea solo recursos públicos de la propia origen.
 
 Las lecciones, el motor, la captura, el audio, el perfil local y la práctica sin conexión no necesitan Supabase.
 

@@ -1,5 +1,26 @@
 # Registro de cambios
 
+## 2026-09-14 — Recorrido guiado de la tecla, paso a paso
+
+- La guía solo se abre desde «Cómo funciona la tecla». La vista se expande desde el botón (sin animación si hay movimiento reducido).
+- Los cinco conceptos se recorren uno a uno: al completar cada paso se elige repetir o seguir. No se puede saltar.
+- Pruebas: `tests/guide.test.ts` y `e2e/guide.spec.ts`. Documentos: `status/general.md`, `status/architecture.md`, `status/decisions.md`, `implementations/2026-09-guia-recorrido-pasos.md`.
+- Impacto: el ritmo de la tecla se enseña en orden. No cambian umbrales, lecciones ni Supabase.
+
+## 2026-09-14 — Guía interactiva de la tecla en Aprender
+
+- Se añadió una tarjeta plegable bajo el hero que explica, con la tecla real, punto, raya, misma letra, otra letra y espacio entre palabras.
+- Cerrada por defecto; se abre desde «Cómo funciona la tecla» o desde la propia tarjeta y se cierra en cualquier momento. Al cerrarla se desmonta la captura de Espacio.
+- Pruebas: `tests/guide.test.ts` y `e2e/guide.spec.ts`. Documentos: `status/general.md`, `status/structure.md`, `status/architecture.md`, `implementations/2026-09-guia-interactiva.md`.
+- Impacto: se puede entender el ritmo de la app sin empezar una lección. No cambia el motor, el catálogo ni las reglas de Supabase.
+
+## 2026-09-14 — Agente especializado de UI/UX
+
+- Se añadió el agente de workspace `Learn Morse UI/UX` para UI/UX, responsive, accesibilidad, animaciones y evaluación de librerías estéticas.
+- El agente incorpora las invariantes de `MorseKey`, PWA, práctica offline, Supabase opcional, movimiento reducido y pruebas Playwright.
+- Documentos actualizados: `implementations/2026-09-agente-ui-ux.md`, `status/structure.md` y `status/decisions.md`.
+- Impacto: nueva capacidad de trabajo para futuras mejoras visuales; no cambia el runtime ni añade dependencias.
+
 ## 2026-09-14 — Verificación de la aplicación existente y sincronización documental
 
 - Se contrastó el código con la propuesta: React + Vite, motor, catálogo de 16 lecciones y 81 ejercicios, captura Espacio/táctil, Web Audio, progreso local, paneles de Supabase, PWA y pruebas.

@@ -55,3 +55,27 @@
 - Decisión: el código y las migraciones se entregan listos; `.env.example` va vacío; no se suben secretos ni se crea el proyecto por el agente.
 - Justificación: el titular configura OAuth, Site URL y el despliegue.
 - Consecuencias: Competir y Perfil en línea muestran el aviso de servicio no configurado hasta que existan las variables públicas.
+
+## 2026-09-14 — Recorrido guiado desde el botón del hero
+
+- Contexto: la guía de la tecla vivía en una tarjeta `<details>` visible y mostraba los cinco puntos a la vez.
+- Problema: se podía abrir sin el botón del hero y completar un concepto posterior sin haber practicado los anteriores. La apertura no salía del botón.
+- Decisión: un `dialog` que solo abre el botón «Cómo funciona la tecla», con expansión FLIP desde su rectángulo. `stepOutcome` valida el paso actual; al completar aparecen «Repetir este paso» y «Siguiente».
+- Justificación: el origen visual es el botón; el aprendizaje es secuencial, con la misma tecla que las lecciones.
+- Consecuencias: Aprender ya no muestra una tarjeta colapsada. Escape, «Cerrar guía» y cambiar de página cierran el diálogo. Con movimiento reducido no hay expansión.
+
+## 2026-09-14 — Tutorial plegable en la página principal
+
+- Contexto: el hero dice que basta una tecla, pero no muestra qué cuenta como la misma letra, otra letra o un espacio entre palabras.
+- Problema: quien llega a la práctica puede confundir una pausa corta con un espacio, o pulsar Espacio fuera de la lección.
+- Decisión: una tarjeta `<details>` en Aprender, cerrada por defecto, con el `MorseKey` real solo mientras está abierta. Cinco pasos se marcan según el código transmitido. Un botón del hero abre la tarjeta.
+- Justificación: la misma captura y los mismos umbrales que en práctica; no hay un simulador paralelo. Al cerrar se deja de interceptar Espacio.
+- Consecuencias: Aprender gana un bloque extra. Navegar o empezar una lección cierra la guía.
+
+## 2026-09-14 — Agente de UI/UX del workspace
+
+- Contexto: la interfaz tiene identidad visual propia y una interacción Morse sensible, pero no contaba con una guía especializada reutilizable.
+- Problema: una mejora estética puede romper captura, foco, audio, responsive, PWA o movimiento reducido si se trata como un rediseño aislado.
+- Decisión: crear `.github/agents/learn-morse-ui-ux.agent.md` con herramientas de lectura, búsqueda, edición y ejecución, y con límites explícitos sobre `MorseKey`, accesibilidad, dependencias y validación.
+- Justificación: concentra el conocimiento visual y las invariantes del producto sin añadir código de ejecución ni dependencias al bundle.
+- Consecuencias: las futuras tareas de interfaz pueden delegarse a un agente consistente; sus cambios seguirán requiriendo pruebas y sincronización documental.

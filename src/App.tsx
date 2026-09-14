@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { lessons, type Lesson } from './content/lessons';
 import { MORSE } from './lib/morse';
 import { readProgress, saveAttempt, lessonPassed, type Attempt } from './lib/progress';
 import { Practice } from './components/Practice';
+import { MorseGuide } from './components/MorseGuide';
 import { AccountPanel, CompetitionPanel, OnlineIdentity } from './online/Panels';
 
 const pages = ['Aprender', 'Practicar', 'Competir', 'Perfil'] as const;
@@ -23,6 +24,9 @@ export default function App() {
   const [install, setInstall] = useState<InstallEvent | null>(null);
   const [update, setUpdate] = useState<ServiceWorker | null>(null);
   const [offline, setOffline] = useState(!navigator.onLine);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideOrigin, setGuideOrigin] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const guideButton = useRef<HTMLButtonElement>(null);
   const [resume, setResume] = useState(() => { try { const d = JSON.parse(localStorage.getItem('learn-morse-draft') || 'null'); return lessons.find(l => l.id === d?.lessonId); } catch { return undefined; } });
   const completedLessons = lessons.filter(l => lessonPassed(progress, l.id, l.exercises.length));
   const accuracy = progress.attempts.length ? Math.round(progress.attempts.reduce((sum, a) => sum + a.accuracy, 0) / progress.attempts.length) : null;
@@ -37,8 +41,8 @@ export default function App() {
     window.addEventListener('online', connection); window.addEventListener('offline', connection); window.addEventListener('morse:update', swUpdate);
     return () => { window.removeEventListener('hashchange', hash); window.removeEventListener('beforeinstallprompt', captureInstall); window.removeEventListener('online', connection); window.removeEventListener('offline', connection); window.removeEventListener('morse:update', swUpdate); };
   }, []);
-  function navigate(next: Page) { setPage(next); setActiveLesson(null); location.hash = next.toLowerCase(); window.scrollTo({ top: 0 }); }
-  function begin(lesson: Lesson) { setActiveLesson(lesson); setResume(lesson); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  function navigate(next: Page) { setPage(next); setActiveLesson(null); setGuideOpen(false); location.hash = next.toLowerCase(); window.scrollTo({ top: 0 }); }
+  function begin(lesson: Lesson) { setActiveLesson(lesson); setResume(lesson); setGuideOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }
   function record(attempt: Attempt) {
     setProgress(previous => {
       const next = saveAttempt(previous, attempt);
@@ -52,7 +56,8 @@ export default function App() {
     <main id="main" className="main-shell" tabIndex={-1}>
       {activeLesson ? <Practice key={activeLesson.id} lesson={activeLesson} onBack={() => setActiveLesson(null)} onRecord={record} /> : page === 'Aprender' ? <>
         <div className="welcome-line"><span>UN POCO DE PRÁCTICA, UN MUNDO DE SEÑALES.</span><span className="live-dot">A tu propio ritmo</span></div>
-        <section className="hero"><div className="hero-copy"><span className="pill"><i /> CADA SEÑAL CUENTA</span><h1>Un pequeño pulso.<br />Un nuevo <em>lenguaje.</em></h1><p>Descubre el código morse, una señal a la vez.<br className="desktop-break" /> Aprende, practica y conecta jugando.</p><button className="button dark" onClick={() => begin(nextLesson)}>Comenzar a aprender <span>↗</span></button><div className="hero-footnote"><span className="tiny-key">␣</span> Solo necesitas una tecla. Y un poco de curiosidad.</div></div><RadioArt /></section>
+        <section className="hero"><div className="hero-copy"><span className="pill"><i /> CADA SEÑAL CUENTA</span><h1>Un pequeño pulso.<br />Un nuevo <em>lenguaje.</em></h1><p>Descubre el código morse, una señal a la vez.<br className="desktop-break" /> Aprende, practica y conecta jugando.</p><div className="hero-actions"><button className="button dark" onClick={() => begin(nextLesson)}>Comenzar a aprender <span>↗</span></button><button ref={guideButton} className="button secondary" aria-expanded={guideOpen} aria-haspopup="dialog" onClick={() => { const r = guideButton.current?.getBoundingClientRect(); setGuideOrigin(r ? { x: r.left, y: r.top, w: r.width, h: r.height } : null); setGuideOpen(true); }}>Cómo funciona la tecla</button></div><div className="hero-footnote"><span className="tiny-key">␣</span> Solo necesitas una tecla. Y un poco de curiosidad.</div></div><RadioArt /></section>
+        <MorseGuide open={guideOpen} origin={guideOrigin} onClose={() => { setGuideOpen(false); guideButton.current?.focus(); }} />
         <div className="dashboard-grid"><section className="learning-section"><div className="section-heading"><div><span className="eyebrow">DE TU PRIMER PUNTO A UNA GRAN HISTORIA</span><h2>Tu camino de señales</h2></div><span className="count-chip">{completedLessons.length} / {lessons.length} completas</span></div><div className="filter-row" aria-label="Filtrar lecciones">{['Todas', 'Introducción', 'Letras', 'Ampliación', 'Palabras', 'Frases', 'Párrafos', 'Textos largos'].map(stage => <button key={stage} aria-pressed={filter === stage} onClick={() => setFilter(stage)}>{stage}</button>)}</div><div className="lesson-list">{lessons.filter(l => filter === 'Todas' || l.stage === filter).map(lesson => { const done = completedLessons.includes(lesson); const number = lessons.indexOf(lesson) + 1; return <button className={`lesson-row ${done ? 'is-complete' : ''}`} key={lesson.id} onClick={() => begin(lesson)}><span className={`lesson-number ${number === 1 ? 'first' : ''}`}>{done ? '✓' : String(number).padStart(2, '0')}</span><span className="lesson-info"><small>{lesson.stage.toUpperCase()}</small><strong>{lesson.title}</strong><span>{lesson.description}</span></span><span className="lesson-meta"><small>{lesson.exercises.length} ejercicios</small><span className="lesson-arrow">↗</span></span></button>; })}</div></section>
         <aside className="dashboard-aside"><section className="card progress-card"><span className="eyebrow">TU FRECUENCIA</span><div className="profile-title"><span className="profile-orbit">✳</span><div><h3>Cada día, más cerca.</h3><p>Tu progreso en este navegador</p></div></div><div className="stats-row"><div><strong>{progress.attempts.length}</strong><span>prácticas</span></div><div><strong>{accuracy === null ? '—' : `${accuracy}%`}</strong><span>precisión</span></div><div><strong>{days}</strong><span>días activos</span></div></div><div className="progress-label"><span>Recorrido completado</span><b>{Math.round(completedLessons.length / lessons.length * 100)}%</b></div><progress value={completedLessons.length} max={lessons.length} /><p className="muted">Completa los ejercicios en ambas direcciones con al menos 85 % de precisión.</p></section>
           <section className="daily-card"><span className="eyebrow">UNA SEÑAL PARA EMPEZAR</span><div className="daily-symbol">· −</div><h3>Todo comienza con una A.</h3><p>Un punto, una raya. Dos pequeños gestos y ya estás hablando otro lenguaje.</p><button className="text-button" onClick={() => begin(lessons.find(l => l.symbols === 'ANSO') || lessons[0])}>Probar esta señal <span>→</span></button></section>
