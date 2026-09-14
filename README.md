@@ -26,7 +26,7 @@ Si el bloqueo persiste, cierra el antivirus o cualquier editor con la carpeta ab
 
 La app incluye 16 lecciones y 81 ejercicios originales, en ambas direcciones. En Aprender, el botón «Cómo funciona la tecla» abre un recorrido de cinco pasos con el mismo control: un concepto cada vez, con opción de repetir o seguir. Ofrece calibración, pistas, presentación visual/auditiva, feedback animado con movimiento reducido y progreso guardado en el navegador. Los textos largos de 182 y 495 palabras se practican completos o por oración.
 
-Para transmitir, enfoca el botón de Espacio. La captura no intercepta los campos de texto. Los umbrales iniciales son 250 ms para raya, 700 ms para confirmar letra y 1600 ms para palabra; se ajustan dentro de la práctica. El sonido requiere una interacción y puede depender de la política del navegador.
+Para transmitir, pulsa la tecla asignada (Espacio por defecto) en cuanto ves el control; no hace falta hacer clic primero. La captura no intercepta los campos de texto. Los umbrales iniciales son 250 ms para raya, 700 ms para confirmar letra y 1600 ms para palabra; se ajustan dentro de la práctica. El sonido requiere una interacción y puede depender de la política del navegador.
 
 ## Cuentas y duelos
 

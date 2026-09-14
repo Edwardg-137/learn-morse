@@ -9,7 +9,7 @@ Actualizado: 2026-09-14. Solo se enumeran carpetas y archivos existentes relevan
 | `docs/status/` | Estado funcional, estructura, arquitectura y decisiones reales. |
 | `docs/changelog.md` | Historial resumido. |
 | `src/` | Aplicación React: interfaz, motor, contenido, audio, progreso y cliente en línea. |
-| `src/lib/` | Motor de morse, audio Web Audio, persistencia local y reglas de la guía de la tecla, sin React. |
+| `src/lib/` | Motor de morse, audio Web Audio, persistencia local, reglas de la guía y captura de tecla, sin React. |
 | `src/content/lessons.ts` | Catálogo versionado de lecciones y ejercicios. |
 | `src/components/` | `Practice.tsx` (sesión de práctica), `MorseKey.tsx` (captura Espacio/táctil) y `MorseGuide.tsx` (recorrido de la tecla desde el hero). |
 | `src/online/` | Paneles de cuenta y duelo, cliente de Supabase y estilos asociados. |

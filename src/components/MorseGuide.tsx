@@ -90,7 +90,7 @@ export function MorseGuide({ open, origin, onClose }: { open: boolean; origin: G
 
   if (!open) return null;
 
-  let live = 'Enfoca el botón y prueba Espacio. Aquí verás qué acaba de pasar.';
+  let live = 'Prueba la tecla o toca el botón. Aquí verás qué acaba de pasar.';
   if (outcome === 'complete') live = step.success;
   else if (outcome === 'mismatch') live = step.mismatch;
   else if (pending) live = `Letra en construcción: ${pending.replaceAll('.', '·').replaceAll('-', '—')}. Todavía no cuenta.`;

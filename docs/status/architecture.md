@@ -16,7 +16,7 @@ El mismo repertorio y la misma normalización viven en PostgreSQL (`morse_normal
 
 ## Captura de teclado y tacto
 
-Con el botón de transmisión enfocado, `keydown` de la tecla configurada inicia una señal y `keyup` la clasifica con `performance.now()`. Un `keydown` con `repeat` no duplica. El umbral de raya inicial es 250 ms; la letra se confirma a los 700 ms y la palabra a los 1600 ms, siempre con `wordMs > letterMs`. Un pointer primario hace lo mismo; un segundo contacto se ignora. `pointercancel` y la pérdida de captura descartan la señal no terminada. Perder el foco de la ventana o ocultar la pestaña cancela la señal y, en práctica, pausa el cronómetro local.
+Mientras el control de transmisión está en pantalla y no está desactivado, `keydown` de la tecla configurada inicia una señal y `keyup` la clasifica con `performance.now()`. No hace falta enfocar el botón. Un `keydown` con `repeat` no duplica. En `INPUT`, `TEXTAREA` y `SELECT` la tecla conserva su función. El umbral de raya inicial es 250 ms; la letra se confirma a los 700 ms y la palabra a los 1600 ms, siempre con `wordMs > letterMs`. Un pointer primario hace lo mismo; un segundo contacto se ignora. `pointercancel` y la pérdida de captura descartan la señal no terminada. Perder el foco de la ventana o ocultar la pestaña cancela la señal y, en práctica, pausa el cronómetro local.
 
 ## Audio
 

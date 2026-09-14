@@ -21,8 +21,16 @@
 - Contexto: una sola tecla debe producir punto y raya desde el primer ejercicio.
 - Problema: cualquier otra tecla por defecto chocaría con la escritura en «Morse a español».
 - Decisión: Espacio (`' '`) es la tecla inicial obligatoria; el usuario puede pasar a F, J o Enter. En campos de texto las teclas conservan su función normal.
-- Justificación: el control de transmisión solo captura cuando está enfocado.
-- Consecuencias: hay que enfocar el botón para transmitir; un `keydown` repetido no duplica la señal.
+- Justificación: Espacio no interfiere con «Morse a español» porque esa dirección no monta el control de transmisión; F, J y Enter son alternativas. En campos de texto la tecla no se captura.
+- Consecuencias: con el control en pantalla, la tecla transmite sin hacer clic en el botón. Un `keydown` repetido no duplica la señal.
+
+## 2026-09-14 — Captura Morse sin clic previo
+
+- Contexto: la tecla solo se escuchaba en el botón de transmisión.
+- Problema: un botón HTML no recibe teclado sin foco, así que había que tocarlo con el cursor antes de poder transmitir.
+- Decisión: escuchar Espacio/F/J/Enter en `window` mientras `MorseKey` está montado y no desactivado. Omitir campos de escritura.
+- Justificación: el control visible es la condición de uso, no el foco del botón.
+- Consecuencias: se puede transmitir con otra cosa enfocada (pista, comprobar). Perder el foco de la ventana sigue cancelando.
 
 ## 2026-09-13 — Validación de XP en PostgreSQL
 

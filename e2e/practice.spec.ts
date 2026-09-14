@@ -1,5 +1,22 @@
 import { test, expect } from '@playwright/test';
 
+test('assigned key transmits without clicking the morse button first', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Comenzar a aprender' }).click();
+  await expect(page.getByRole('button', { name: 'Transmitir morse con Espacio' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ver una pista' }).focus();
+  await expect(page.getByRole('button', { name: 'Transmitir morse con Espacio' })).not.toBeFocused();
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(80);
+  await page.keyboard.up('Space');
+  await expect(page.getByTestId('morse-code')).toHaveText('.');
+  await page.getByText('Ajustar mi señal').click();
+  await page.getByLabel('Tecla de transmisión').selectOption('j');
+  await page.getByRole('button', { name: 'Ver una pista' }).focus();
+  await page.keyboard.press('j');
+  await expect(page.getByTestId('morse-code')).toHaveText('. .');
+});
+
 test('Espacio transmits a dot, holding transmits one dash, and Spanish typing remains normal', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Comenzar a aprender' }).click();

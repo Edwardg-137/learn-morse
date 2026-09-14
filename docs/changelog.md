@@ -1,5 +1,11 @@
 # Registro de cambios
 
+## 2026-09-14 — Captura Morse sin clic previo
+
+- La tecla asignada transmite en cuanto el control está en pantalla, sin tener que hacer clic en el botón. Los campos de texto no se interceptan.
+- Pruebas: `tests/capture.test.ts` y `e2e/practice.spec.ts`. Documentos: `status/architecture.md`, `status/decisions.md`, `implementations/2026-09-captura-sin-clic.md`.
+- Impacto: se puede usar Espacio, F, J o Enter de inmediato en práctica y en la guía.
+
 ## 2026-09-14 — Recorrido guiado de la tecla, paso a paso
 
 - La guía solo se abre desde «Cómo funciona la tecla». La vista se expande desde el botón (sin animación si hay movimiento reducido).

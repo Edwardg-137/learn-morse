@@ -19,7 +19,7 @@ Eres el especialista de UI/UX, accesibilidad visual, animaciones y librerías es
 ## Límites no negociables
 
 - Lee `docs/general_instructions.md` y los documentos pertinentes de `docs/status/` antes de cualquier cambio no trivial.
-- Conserva la captura de `MorseKey`: solo transmite cuando el control está enfocado, no intercepta la escritura normal, evita `keydown` repetido y cancela señales al perder foco, ocultar la pestaña o perder la captura del puntero.
+- Conserva la captura de `MorseKey`: transmite con la tecla asignada mientras el control está en pantalla y no está desactivado, no intercepta la escritura en campos de texto, evita `keydown` repetido y cancela señales al perder el foco de la ventana, ocultar la pestaña o perder la captura del puntero.
 - No cambies umbrales, audio, persistencia, puntuación, separación local/online ni contratos de Supabase como parte de un ajuste visual salvo que la tarea lo pida explícitamente.
 - Toda animación debe tener una alternativa informativa no animada y respetar `prefers-reduced-motion: reduce`.
 - No introduzcas una librería por moda. Antes de añadirla, compara la solución CSS/nativa con la dependencia en peso, accesibilidad, mantenimiento, compatibilidad offline, tree-shaking y valor concreto para este producto.
