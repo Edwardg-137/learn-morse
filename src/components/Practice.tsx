@@ -62,6 +62,8 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
   const [paused, setPaused] = useState(!!draft && !draft.result);
   const [result, setResult] = useState<Result | null>(draft?.result || null);
   const [finalResult, setFinalResult] = useState<Result | null>(draft?.finalResult || null);
+  const [resultOpen, setResultOpen] = useState(!!draft?.finalResult);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [bubble, setBubble] = useState('');
   const [warning, setWarning] = useState('');
@@ -73,6 +75,8 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
   const audioRequest = useRef(0);
   const lastPulse = useRef(performance.now());
   const previousCode = useRef(draft?.answer || '');
+  const resultDialog = useRef<HTMLDialogElement>(null);
+  const resultReopen = useRef<HTMLButtonElement>(null);
   const activeAttempt = useRef(attemptId); activeAttempt.current = attemptId;
   const submitting = useRef(false);
   const text = (lesson.infinite ? targets[exercise] : lesson.exercises[exercise]) || '';
@@ -103,6 +107,14 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
     const timer = setTimeout(() => setBubble(''), 1300);
     return () => clearTimeout(timer);
   }, [bubble]);
+  useEffect(() => {
+    const dialog = resultDialog.current;
+    if (completed && resultOpen && !dialog?.open) dialog?.showModal();
+    if ((!completed || !resultOpen) && dialog?.open) dialog.close();
+  }, [completed, resultOpen]);
+  useEffect(() => {
+    if (completed && !resultOpen) resultReopen.current?.focus();
+  }, [completed, resultOpen]);
   function silence() { audioRequest.current++; stopAudio(); clearTimeout(playTimer.current); setPlaying(false); }
   function clearInput() { setAnswer(''); setPending(false); setResult(null); previousCode.current = ''; setResetKey(k => k + 1); setBubble(''); silence(); }
   function startOver(nextExercise = exercise, nextDirection = direction) {
@@ -114,7 +126,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
         return next;
       });
     }
-    setExercise(nextExercise); setDirection(nextDirection); setSegment(0); setAnswers([]); setSeconds(0); setFinalResult(null); setPaused(false); setOnlineStatus(''); setReviews([]); setAttemptId(crypto.randomUUID());
+    setExercise(nextExercise); setDirection(nextDirection); setSegment(0); setAnswers([]); setSeconds(0); setFinalResult(null); setResultOpen(false); setHistoryOpen(false); setPaused(false); setOnlineStatus(''); setReviews([]); setAttemptId(crypto.randomUUID());
   }
   function capture(code: string) {
     setAnswer(code);
@@ -140,7 +152,7 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
       setBubble(checked.accuracy >= 85 ? '¡Señal recibida!' : '¡Casi!');
       const collected = [...answers, actual];
       if (index === segments.length - 1) {
-        const overall = evaluate(text, collected.join(' ')); setFinalResult(overall);
+        const overall = evaluate(text, collected.join(' ')); setFinalResult(overall); setResultOpen(true); setHistoryOpen(false);
         const id = attemptId;
         onRecord({ id, lessonId: lesson.id, exercise, direction, accuracy: overall.accuracy, seconds, date: new Date().toISOString() });
         const submitted = direction === 'send' ? [...answers.map(a => a.includes('�') ? '' : encode(a)), answer].join(' / ') : collected.join(' ');
@@ -160,6 +172,10 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
     try { localStorage.setItem('learn-morse-settings', JSON.stringify(s)); } catch { setWarning('Los ajustes se usarán en esta sesión, pero no se pudieron guardar.'); }
   }
   const shownResult = finalResult || result;
+  const resultBody = shownResult && <><span className="eyebrow">{completed ? 'EJERCICIO COMPLETO' : 'SEGMENTO REVISADO'}</span><h2>{shownResult.accuracy >= 85 ? '¡Señal recibida!' : 'Cada intento te acerca'}</h2><div className="result-stats"><strong>{Math.round(shownResult.accuracy)}% <small>precisión</small></strong><strong>{shownResult.substitutions + shownResult.insertions + shownResult.deletions} <small>errores</small></strong></div><p>{shownResult.substitutions} sustituciones · {shownResult.deletions} omisiones · {shownResult.insertions} inserciones</p><p className="review-answer"><b>Respuesta esperada:</b> {normalize(completed ? text : target)}</p>{onlineStatus && <p role="status">{onlineStatus}</p>}
+    <div className="result-actions">{completed ? <><button className="button secondary" onClick={() => startOver()}>Repetir ejercicio</button><button className="button primary" onClick={() => startOver(lesson.infinite ? exercise + 1 : (exercise + 1) % lesson.exercises.length)}>{lesson.infinite ? 'Siguiente señal →' : 'Siguiente ejercicio →'}</button></> : <><button className="button secondary" onClick={retrySegment}>Repetir segmento</button><button className="button primary" onClick={nextSegment}>Siguiente segmento →</button></>}</div>
+  </>;
+  const historyBody = <><p>Los errores anteriores se conservan aunque repitas. Total registrado: {reviews.reduce((sum, review) => sum + review.result.distance, 0)} errores.</p><ol>{reviews.map((review, i) => <li key={review.id}><b>Intento {i + 1} · Segmento {review.segment + 1} · {Math.round(review.result.accuracy)}%</b><p>Tu respuesta: {review.answer || 'Sin respuesta'}</p><small>{review.result.substitutions} sustituciones · {review.result.deletions} omisiones · {review.result.insertions} inserciones</small></li>)}</ol></>;
   return <div className="practice-page">
     <button className="text-button back-button" onClick={onBack}>← Volver al recorrido</button>
     <div className="practice-heading"><div><span className="eyebrow">{lesson.infinite ? `${lesson.stage} · SEÑAL ${exercise + 1} · SIN FIN` : `${lesson.stage} · EJERCICIO ${exercise + 1} DE ${lesson.exercises.length}`}</span><h1>{lesson.title}</h1><p>{lesson.description}</p></div><span className="timer">◷ {Math.floor(seconds / 60)}:{String(Math.floor(seconds % 60)).padStart(2, '0')}</span></div>
@@ -177,10 +193,9 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
       </div>
       {!result && <div className="exercise-actions"><button className="text-button" onClick={() => { if (!help && presentation === 'audio') { setPresentation('both'); setWarning('Ayuda activada: cambiamos a Visual y audio para mostrar la pista.'); } setHelp(h => !h); }}>{help ? 'Ocultar ayuda' : 'Ver una pista'}</button><button className="button primary" disabled={paused || pending || !answer.trim()} onClick={() => void check()}>Comprobar respuesta <span>→</span></button></div>}
       {help && <div className="hint"><strong>Una señal a la vez</strong><p>{normalized}</p><code>{encode(target)}</code><small>La ñ usa --.-- en este curso. Tildes y mayúsculas no cambian la respuesta.</small></div>}
-      {shownResult && <div className={`result-card ${shownResult.accuracy >= 85 ? 'success' : ''}`}><span className="eyebrow">{completed ? 'EJERCICIO COMPLETO' : 'SEGMENTO REVISADO'}</span><h2>{shownResult.accuracy >= 85 ? '¡Señal recibida!' : 'Cada intento te acerca'}</h2><div className="result-stats"><strong>{Math.round(shownResult.accuracy)}% <small>precisión</small></strong><strong>{shownResult.substitutions + shownResult.insertions + shownResult.deletions} <small>errores</small></strong></div><p>{shownResult.substitutions} sustituciones · {shownResult.deletions} omisiones · {shownResult.insertions} inserciones</p><p className="review-answer"><b>Respuesta esperada:</b> {normalize(completed ? text : target)}</p>{onlineStatus && <p role="status">{onlineStatus}</p>}
-        <div className="result-actions">{completed ? <><button className="button secondary" onClick={() => startOver()}>Repetir ejercicio</button><button className="button primary" onClick={() => startOver(lesson.infinite ? exercise + 1 : (exercise + 1) % lesson.exercises.length)}>{lesson.infinite ? 'Siguiente señal →' : 'Siguiente ejercicio →'}</button></> : <><button className="button secondary" onClick={retrySegment}>Repetir segmento</button><button className="button primary" onClick={nextSegment}>Siguiente segmento →</button></>}</div>
-      </div>}
-      {reviews.length > 0 && <details className="hint" open data-testid="segment-history"><summary>Historial de segmentos · {reviews.length} intentos</summary><p>Los errores anteriores se conservan aunque repitas. Total registrado: {reviews.reduce((sum, review) => sum + review.result.distance, 0)} errores.</p><ol>{reviews.map((review, i) => <li key={review.id}><b>Intento {i + 1} · Segmento {review.segment + 1} · {Math.round(review.result.accuracy)}%</b><p>Tu respuesta: {review.answer || 'Sin respuesta'}</p><small>{review.result.substitutions} sustituciones · {review.result.deletions} omisiones · {review.result.insertions} inserciones</small></li>)}</ol></details>}
+      {shownResult && !completed && <div className={`result-card ${shownResult.accuracy >= 85 ? 'success' : ''}`}>{resultBody}</div>}
+      {reviews.length > 0 && !completed && <details className="hint" open data-testid="segment-history"><summary>Historial de segmentos · {reviews.length} intentos</summary>{historyBody}</details>}
+      {completed && !resultOpen && <button ref={resultReopen} className="button secondary result-reopen" onClick={() => setResultOpen(true)}>Ver resultado final</button>}
       {warning && <p className="notice" role="status">{warning}</p>}
     </section><aside className="practice-aside"><section className="card lesson-note"><span className="eyebrow">BITÁCORA DE APRENDIZAJE</span><h2>El ritmo se aprende.</h2><p>{lesson.explanation}</p><div className="rhythm-guide"><span><b>·</b>Punto<br /><small>Pulsa y suelta</small></span><span><b>—</b>Raya<br /><small>Mantén un poco</small></span></div><p className="muted">Deja una pausa para separar letras. Una pausa más larga empieza otra palabra.</p></section>
       <details className="card settings"><summary>Ajustar mi señal <span>⌘</span></summary><label>Tecla de transmisión<select value={settings.key} onChange={e => updateSettings({ ...settings, key: e.target.value })}><option value=" ">Espacio</option><option value="f">F</option><option value="j">J</option><option value="Enter">Enter</option></select></label>
@@ -193,5 +208,6 @@ export function Practice({ lesson, onBack, onRecord }: { lesson: Lesson; onBack:
       </details>
       {text.split(/\s+/).length > 25 && <div className="card settings"><label>Forma de practicar<select value={segmented ? 'segments' : 'continuous'} onChange={e => { startOver(); setSegmented(e.target.value === 'segments'); }}><option value="segments">Por oraciones</option><option value="continuous">Texto completo</option></select></label><p className="muted">{text.split(/\s+/).length} palabras. Puedes pausar y retomar a tu ritmo.</p></div>}
     </aside></div>
+    {completed && shownResult && <dialog ref={resultDialog} className="result-dialog" aria-label="Ejercicio completo" onClose={() => { setResultOpen(false); setHistoryOpen(false); }}><div className={`result-card result-modal-card ${shownResult.accuracy >= 85 ? 'success' : ''}`}><button className="result-close" aria-label="Cerrar resultado" onClick={() => resultDialog.current?.close()}>×</button>{resultBody}{reviews.length > 0 && <section className={`result-history ${historyOpen ? 'is-open' : ''}`} data-testid="segment-history"><button className="result-history-toggle" aria-expanded={historyOpen} aria-controls="result-history-content" onClick={() => setHistoryOpen(open => !open)}>Historial de segmentos · {reviews.length} intentos <span aria-hidden="true">⌄</span></button><div id="result-history-content" className="result-history-reveal" aria-hidden={!historyOpen}><div>{historyBody}</div></div></section>}</div></dialog>}
   </div>;
 }

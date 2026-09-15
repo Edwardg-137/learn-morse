@@ -69,6 +69,43 @@ test('reviewed completion survives reload and requires explicit repeat for anoth
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('learn-morse-progress')!).attempts.length)).toBe(2);
 });
 
+test('final result modal owns the collapsible segment history', async ({ page }) => {
+  await begin(page);
+  await page.getByRole('button', { name: 'Morse a español', exact: true }).click();
+  await page.getByLabel('Tu traducción').fill('E');
+  await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Ejercicio completo' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Repetir ejercicio' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Siguiente ejercicio' })).toBeVisible();
+
+  const history = dialog.getByTestId('segment-history');
+  const toggle = history.getByRole('button', { name: /Historial de segmentos/ });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toHaveAttribute('aria-controls', 'result-history-content');
+  await expect(history.locator('#result-history-content')).toHaveAttribute('aria-hidden', 'true');
+  const initialHeight = (await dialog.boundingBox())!.height;
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(history.locator('#result-history-content')).toHaveAttribute('aria-hidden', 'false');
+  await expect.poll(async () => (await dialog.boundingBox())!.height).toBeGreaterThan(initialHeight);
+});
+
+test('closed final result remains available to reopen', async ({ page }) => {
+  await begin(page);
+  await page.getByRole('button', { name: 'Morse a español', exact: true }).click();
+  await page.getByLabel('Tu traducción').fill('E');
+  await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
+  await page.keyboard.press('Escape');
+
+  await expect(page.getByRole('dialog', { name: 'Ejercicio completo' })).toBeHidden();
+  const reopen = page.getByRole('button', { name: 'Ver resultado final' });
+  await expect(reopen).toBeFocused();
+  await reopen.click();
+  await expect(page.getByRole('dialog', { name: 'Ejercicio completo' })).toBeVisible();
+});
+
 test('segment retries preserve errors and reviewed state across reload', async ({ page }) => {
   const lesson = lessons.find(lesson => lesson.id === 'parrafos')!;
   const first = lesson.exercises[0].split('.')[0] + '.';
@@ -77,6 +114,8 @@ test('segment retries preserve errors and reviewed state across reload', async (
   await page.getByRole('button', { name: 'Morse a español', exact: true }).click();
   await page.getByLabel('Tu traducción').fill('Z');
   await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('SEGMENTO REVISADO')).toBeVisible();
   await page.getByRole('button', { name: 'Repetir segmento' }).click();
   await page.getByLabel('Tu traducción').fill(first);
   await page.getByRole('button', { name: 'Comprobar respuesta' }).click();

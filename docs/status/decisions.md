@@ -1,5 +1,13 @@
 # Decisiones del proyecto
 
+## 2026-09-14 — Resultado final en ventana modal
+
+- Contexto: «EJERCICIO COMPLETO» y el historial de segmentos se mostraban uno debajo del otro dentro de la tarjeta de práctica.
+- Problema: en ejercicios segmentados, el historial alargaba la página y diluía las acciones finales; el resultado intermedio y el final tampoco tenían jerarquías distintas.
+- Decisión: mantener «SEGMENTO REVISADO» en línea y mostrar solo el resultado final en un `dialog` nativo. El historial vive dentro del diálogo, cerrado inicialmente, y se expande con CSS hasta un máximo de `90vh`.
+- Justificación: concentra el cierre del ejercicio sin interrumpir cada segmento y reutiliza HTML, estado y estilos existentes sin dependencias.
+- Consecuencias: el fondo queda inerte mientras el resultado está abierto. Cerrar o pulsar Escape deja un botón «Ver resultado final» con foco para recuperar las acciones; el movimiento reducido elimina las animaciones.
+
 ## 2026-09-13 — Base técnica y operación
 
 - Contexto: prueba de concepto de código libre con aprendizaje, perfiles y competencias, buscando alojamiento de bajo mantenimiento.

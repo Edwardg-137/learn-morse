@@ -40,3 +40,24 @@
 .guide-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 @media(max-width:760px){.guide-body{grid-template-columns:1fr}.guide-head{flex-direction:column}.guide-head h2{font-size:22px}.guide-layer{padding:12px;align-items:end}}
 @media(prefers-reduced-motion:reduce){.guide-backdrop{opacity:1}}
+.result-dialog{width:min(620px,calc(100vw - 32px));max-height:90vh;margin:auto;padding:0;border:0;background:transparent;overflow:visible}
+.result-dialog::backdrop{background:#1d2a2073;animation:result-backdrop-in .22s ease-out}
+.result-dialog[open]{animation:result-dialog-in .22s ease-out}
+.result-modal-card{position:relative;max-height:90vh;margin:0;overflow:auto;box-shadow:0 28px 70px #22301c2e}
+.result-close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;font-size:25px;line-height:1;color:#63715a}
+.result-close:hover{background:#e1eacb;color:var(--ink)}
+.result-reopen{margin-top:24px}
+.result-history{margin-top:20px;padding:17px 19px;border-radius:10px;background:#f7f3e6}
+.result-history-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;text-align:left;font-size:12px;font-weight:600}
+.result-history-toggle span{font-size:18px;transition:transform .24s ease}
+.result-history.is-open .result-history-toggle span{transform:rotate(180deg)}
+.result-history-reveal{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+.result-history.is-open .result-history-reveal{grid-template-rows:1fr}
+.result-history-reveal>div{min-height:0;overflow:hidden}
+.result-history ol{margin-bottom:0;padding-left:22px}
+.result-history li+li{margin-top:15px}
+.result-history li p{margin:4px 0}
+@keyframes result-dialog-in{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes result-backdrop-in{from{opacity:0}to{opacity:1}}
+@media(max-width:760px){.result-dialog{width:calc(100vw - 24px)}.result-modal-card{padding:20px}.result-close{top:10px;right:10px}.result-history{padding:15px}}
+@media(prefers-reduced-motion:reduce){.result-dialog[open],.result-dialog::backdrop{animation:none}.result-history-reveal,.result-history-toggle span{transition:none}}

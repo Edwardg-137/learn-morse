@@ -1,5 +1,13 @@
 # Registro de cambios
 
+## 2026-09-14 — Modal de resultado final con historial desplegable
+
+- «EJERCICIO COMPLETO» pasó de tarjeta en línea a ventana modal nativa, con el mismo resumen y las mismas acciones.
+- El historial de segmentos ahora está dentro del modal, cerrado por defecto; al abrirlo la ventana crece hasta el límite del viewport y después desplaza su contenido.
+- «SEGMENTO REVISADO» continúa en la página. El modal puede cerrarse con su botón o Escape y reabrirse sin perder el resultado.
+- Pruebas: `e2e/capture.spec.ts` y recorrido móvil en `e2e/navigation.spec.ts`. Documentos: `status/general.md`, `status/architecture.md`, `status/decisions.md`, `implementations/2026-09-modal-resultado-final.md`.
+- Impacto: mejor jerarquía del cierre de lección en escritorio y móvil, sin dependencias nuevas ni cambios de datos.
+
 ## 2026-09-14 — Taladro infinito y licencia MIT-0
 
 - Se añadió la lección intermedia «Señales sueltas»: letras y números individuales al azar, sin fin. No cuenta para el porcentaje del curso ni concede XP de servidor.

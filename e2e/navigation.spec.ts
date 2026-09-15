@@ -46,6 +46,7 @@ test('practice pause, error bubble, success and profile remain usable on a small
   await page.getByRole('button', { name: 'Comprobar respuesta' }).click();
   await expect(page.getByRole('heading', { name: '¡Señal recibida!' })).toBeVisible();
   await page.screenshot({ path: 'test-results/success-feedback.png' });
+  await page.getByRole('button', { name: 'Cerrar resultado' }).click();
   await page.getByRole('button', { name: 'Perfil', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Bitácora del explorador.' })).toBeVisible();
   await expect(page.getByText('Los intentos locales no se convierten automáticamente en XP verificada.')).toBeVisible();
